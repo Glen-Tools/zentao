@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  zentao:
+    image: easysoft/zentao:18.9
+    container_name: zentao
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      - MYSQL_INTERNAL=true
+      - ZT_MYSQL_HOST=${ZT_MYSQL_HOST}
+      - ZT_MYSQL_PORT=${ZT_MYSQL_PORT}
+      - ZT_MYSQL_DB=${ZT_MYSQL_DB}
+      - ZT_MYSQL_USER=${ZT_MYSQL_USER}
+      - ZT_MYSQL_PASSWORD=${ZT_MYSQL_PASSWORD}
+      - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME}
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT}
+      - PHP_POST_MAX_SIZE=${PHP_POST_MAX_SIZE}
+      - PHP_UPLOAD_MAX_FILESIZE=${PHP_UPLOAD_MAX_FILESIZE}
+    volumes:
+      - zentao_data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  db:
+    image: mysql:8.0
+    container_name: zentao-mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    expose:
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${ZT_MYSQL_DB}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/mysql_init:/docker-entrypoint-initdb.d
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+  
+volumes:
+  db_data:
+  zentao_data:
+
